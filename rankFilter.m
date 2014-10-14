@@ -1,0 +1,142 @@
+function [ imageH ] = rankFilter(image )
+
+    close all;
+    
+%     lobal image
+
+    image  = rgb2gray(image);
+    r_size = 500 / size(image,1)
+    image = imresize(image,r_size);
+    
+    
+    
+    SIZE = 11; %%% odd
+    
+    
+    filter = ones(1,SIZE)/SIZE;
+    filter
+    
+    si = size(image);
+
+    start = floor(SIZE/2);
+    
+    
+    imageV = zeros(si-2*start);
+    imageH = zeros(si-2*start);
+   
+    
+    
+    
+    %%%%%%%%%%Horizontal rank filter%%%%%%%
+    for row = (start+1):si(1)-start
+        for col=(start+1):si(2)-start
+            for j=-start:start
+                imageH(row-start,col-start)= imageH(row-start,col-start)+ double(image(row,col+j)*filter(j+start+1)); 
+            end
+        end
+    end
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+     for col = (start+1):si(2)-start
+        for row=(start+1):si(1)-start
+            for j=-start:start
+                imageV(row-start,col-start)= imageV(row-start,col-start)+ double(image(row+j,col)*filter(j+start+1)); 
+            end
+        end
+     end
+    
+    
+     imageV= edge(uint8(imageV),'sobel','vertical');
+     imageH= edge(uint8(imageH),'sobel','horizontal');
+    %imageH = conv2(image,h');
+    
+   % imshow((imageH));
+   
+    %%%%%%%%%%%%%%%%%%%%%%% vertical projection %%%%%%%%
+    
+    sumV = sum(imageV,2);
+    sumH = sum(imageH,1);
+    
+    %plot(sumV);
+
+    subplot(2,2,1) , imshow(image);
+    subplot(2,2,3) , plot(sumV);
+    
+    SIZE1 = 31;
+    start1 = floor(SIZE1/2);
+    
+    sumV1 = zeros(size(sumV));
+    sumH1 = zeros(size(sumH));
+    for i=(start1+1):(si(1)-2*start)-start1
+       for j=-start1:start1
+                sumV1(i-start1) = sumV1(i-start1) + double(sumV(i+j)*(1/SIZE1));
+       end
+    end
+    
+    for i=(start1+1):(si(2)-2*start)-start1
+       for j=-start1:start1
+                sumH1(i-start1) = sumH1(i-start1) + double(sumH(i+j)*(1/SIZE1));
+       end
+    end
+    
+    
+    
+    subplot(2,2,4) , plot(sumV1);
+    %subplot(2,2,2) , plot(sumH1);
+    
+    
+    %%%%%%%%%%%%%%%%     Calculate band         %%%%%%%%%%%%%%%
+    
+    NUM_OF_PLATES = 5;
+    Cy = 0.55;
+    %left_margin = 50;
+    %right_margin = 50;
+    
+    detected_plates = ones(NUM_OF_PLATES,2);
+    
+    for i=1:NUM_OF_PLATES
+           
+            [c ind] = max(sumV1)
+             var = ind-1;
+            while(true && var>0)
+                 if(sumV1(var) <= Cy * c)
+                    detected_plates(i,1)= var;
+                    y0 = var
+                    break;
+                 end
+                 var  = var-1;
+            end
+            
+            
+            var = ind+1;
+            while(true && var<= size(sumV1,1))
+                 if(sumV1(var) <=Cy*c)
+                    detected_plates(i,2) = var;
+                    y1 = var
+                    break;
+                end
+                var = var + 1;
+            end
+            sumV1(detected_plates(i,1):detected_plates(i,2)) = 0;
+            
+            
+    end
+    
+   
+% %      imshow(image);
+%     detected_plates(1,1)+start+start1
+    
+    image(1:detected_plates(1,1)+start+start1,:)=0;
+    image(detected_plates(1,2)+start+start1:si(1),:)=0;
+    subplot(2,2,2);
+    imshow(image);
+    
+    
+    
+    
+    
+    
+    
+end
+

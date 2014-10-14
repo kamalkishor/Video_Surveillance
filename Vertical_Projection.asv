@@ -1,0 +1,12 @@
+function [  ] = Vertical_Projection()
+
+
+    for i=(start1+1):(si(1)-2*start)-start1
+       for j=-start1:start1
+                sumV1(i-start1) = sumV1(i-start1) + double(sumV(i+j)*(1/SIZE1));
+       end
+    end
+
+
+end
+

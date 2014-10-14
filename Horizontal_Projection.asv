@@ -1,0 +1,54 @@
+function [Hor_proj] = Horizontal_Projection(image,Size,index)
+
+    global detected_plates;
+    global Cx
+
+    sumH = sum(image,1); %%%% horizontal projection %%%%%%
+    subplot(3,1,2),plot(sumH);
+    
+    %%% Apply rank filter to correct ragged graph
+    size_image = size(image);
+    
+    Hor_proj = zeros(1,size_image(2));
+   
+    start = floor(Size/2);
+       
+    for i=(start+1):(size_image(2))-start
+       for j=-start:start
+              Hor_proj(i) = Hor_proj(i) + double(sumH(i+j)*(1/Size));
+       end
+    end
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    
+    
+    
+    [c ind] = max(Hor_proj);
+    var = ind-1;
+    
+    while(true && var>0)
+        if(Hor_proj(var) <= Cx * c)
+            detected_plates(index,1)= var;
+            %y0 = var
+            break;
+        end
+        var  = var-1;
+    end
+    
+    var = ind+1;
+    while(true && var<= size(Hor_proj,2))
+        if(Hor_proj(var) <=Cx*c)
+            detected_plates(index,2) = var;
+           % y1 = var
+            break;
+        end
+        var = var + 1;
+    end
+    
+    
+    
+
+
+end
+

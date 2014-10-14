@@ -1,0 +1,41 @@
+function Calculate_Bands(Vert_proj)
+
+    global NUM_OF_PLATES;
+    global detected_plates;
+    global Cy;
+    global SI
+    
+    
+    start = floor(SIZE_RANK_FILTER/2);
+    
+    
+    for i=1:NUM_OF_PLATES
+            size(Vert_proj)
+            [c ind] = max(Vert_proj);
+            %ind
+            var = ind-1;
+            
+            while(true && var>0)
+                 if(Vert_proj(var) <= Cy * c)
+                    detected_plates(i,3)= var;
+                    y0 = var
+                    break;
+                 end
+                 var  = var-1;
+            end
+            
+            var = ind+1;
+            while(true && var<= size(Vert_proj,1))
+                 if(Vert_proj(var) <=Cy*c)
+                    detected_plates(i,4) = var;
+                    y1 = var
+                    break;
+                end
+                var = var + 1;
+            end
+            Vert_proj(detected_plates(i,3):detected_plates(i,4)) = 0;
+    end
+
+
+end
+
